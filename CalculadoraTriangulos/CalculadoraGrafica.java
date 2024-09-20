@@ -1,26 +1,51 @@
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import javax.swing.JTextField;
-import java.awt.Graphics;
-import javax.swing.JButton;
+import java.awt.*;
+import javax.swing.*;
 public class CalculadoraGrafica{
     // Declaración de atributos
     private CalcularTriangulo calcular;
+    private int MAX_SIZE = 2;
+    private Pila miPila;
+    private int contador;
+    private double ladoA;
+    private double ladoB;
+    private double ladoC;
+    private double anguloA;
+    private double anguloB;
+    private double anguloC;
+    private double area;
+    private double perimetro; 
+    private double semiPerimetro;
+    private double ha;
+    private double hb;
+    private double hc;
+    private double ma;
+    private double mb;
+    private double mc;
+    private double radioInterno;
+    private double radioExterno;
+    private DefaultListModel<String> model;
+    private JList<String> historialDeTriangulos;
+    private JOptionPane scrollpane;
     /*
      * Constructor vacío
      */
-    public CalculadoraGrafica(){}
+    public CalculadoraGrafica(){
+        miPila = new Pila<>(MAX_SIZE);
+    }
+
+    
     /*
      * Método para hacer la calculadora mediante una GUI
      */
     public void calculadoraTrianguloGrafico(){
         // Declaración de un boton
         JButton boton = new JButton("Calcular");
+        JButton botonDeshacer = new JButton("Limpiar");
+        JButton botonMostrar = new JButton("Mostrar historial");
+        JButton botonEliminar1 = new JButton("Deshacer");
+        JButton botonEliminar2 = new JButton("Eliminar todos los triangulos");
         // Declaración de etiquetas
         JLabel labelLadoA = new JLabel("Lado A:");
         JLabel labelLadoB = new JLabel("Lado B:");
@@ -90,6 +115,7 @@ public class CalculadoraGrafica{
         // Creación del frame y panel
         JFrame frame = new JFrame();
         JPanel panel = new JPanel(null){
+
             @Override 
             /*
              * Método para mostrar una imagen detras de las etiquetas
@@ -101,6 +127,12 @@ public class CalculadoraGrafica{
                 g.drawImage(imagen.getImage(),40, 40, 550, 550, this);
             }
         };
+        model = new DefaultListModel<>();
+        historialDeTriangulos = new JList<>(model);
+        panel.add(historialDeTriangulos);
+        historialDeTriangulos.setBounds(920, 0, 500, 500);
+        scrollpane = new JOptionPane(historialDeTriangulos);
+        panel.add(historialDeTriangulos);
         // Acomodo de las etiquetas y se añaden al panel
         labelLadoA.setBounds(440, 240, 100, 40);
         panel.add(labelLadoA);
@@ -194,7 +226,9 @@ public class CalculadoraGrafica{
         panel.add(labelRadioExterno);
         textRadioExterno.setBounds(790, 640, 100, 40);
         panel.add(textRadioExterno);
-        boton.setBounds(260, 630, 100, 40);
+        boton.setBounds(100, 550, 100, 40);
+       
+        
         // Añadimos el boton al panel
         panel.add(boton);
         boton.addActionListener(new ActionListener() {
@@ -204,24 +238,24 @@ public class CalculadoraGrafica{
              */
             public void actionPerformed(ActionEvent e){
                 // Declaración de variables e inicializadas en 0
-                int contador = 0;
-                double ladoA = 0;
-                double ladoB = 0;
-                double ladoC = 0;
-                double anguloA = 0;
-                double anguloB = 0;
-                double anguloC = 0;
-                double area = 0;
-                double perimetro = 0; 
-                double semiPerimetro = 0;
-                double ha = 0;
-                double hb = 0;
-                double hc = 0;
-                double ma = 0;
-                double mb = 0;
-                double mc = 0;
-                double radioInterno = 0;
-                double radioExterno = 0;
+                contador = 0;
+                ladoA = 0;
+                ladoB = 0;
+                ladoC = 0;
+                anguloA = 0;
+                anguloB = 0;
+                anguloC = 0;
+                area = 0;
+                perimetro = 0; 
+                semiPerimetro = 0;
+                ha = 0;
+                hb = 0;
+                hc = 0;
+                ma = 0;
+                mb = 0;
+                mc = 0;
+                radioInterno = 0;
+                radioExterno = 0;
                 // Creación del objeto para calcular un triangulo
                 calcular = new CalcularTriangulo();
                 // Verifica si el campo de texto esta vacío
@@ -321,6 +355,7 @@ public class CalculadoraGrafica{
                     area = calcular.calcularArea(ladoA, ladoB, calcular.getAnguloC());
                     perimetro = calcular.calcularPerimetro(ladoA, ladoB, ladoC);
                     semiPerimetro = calcular.calcularSemiPerimetro(ladoA, ladoB, ladoC);
+                    ha = calcular.heightHa(ladoA, ladoB, ladoC);
                     hb = calcular.heightHb(ladoA, ladoB, ladoC);
                     hc = calcular.heightHc(ladoA, ladoB, ladoC);
                     ma = calcular.medianMa(ladoA, ladoC, calcular.getAnguloB());
@@ -339,14 +374,20 @@ public class CalculadoraGrafica{
                     textPerimetro.setText(String.format("%.4f",perimetro));
                     textSemiPerimetro.setText(String.format("%.4f",semiPerimetro));
                     textHA.setText(String.format("%.4f", ha));
-                    textHB.setText(String.format("%.4f",hb));
+                    textHB.setText(String.format("%.4f", hb));
                     textHC.setText(String.format("%.4f", hc));
                     textMA.setText(String.format("%.4f", ma));
                     textMB.setText(String.format("%.4f", mb));
                     textMC.setText(String.format("%.4f", mc));
                     textRadioInterno.setText(String.format("%.4f", radioInterno));
                     textRadioExterno.setText(String.format("%.4f", radioExterno));
-                    }
+                    calcular.toString();
+                    
+                    miPila.push(calcular);
+                    model.add(miPila.getTope(), miPila.peek().toString());
+                    
+                }
+
                 // Utilizamos otra comprobacion por si el usuario desea calcular el triangulo dando 2 lados y 1 angulo
                 } else if(contador == 3 && ((ladoA >= 1 && ladoB >= 1 && anguloA >= 1) || (ladoA >= 1 && ladoB >= 1 && anguloB >= 1) || (ladoA >= 1 && ladoB >= 1 && anguloC >= 1) || 
                 (ladoA >= 1 && ladoC >= 1 && anguloA >= 1) || (ladoA >= 1 && ladoC >= 1 && anguloB >= 1) || (ladoA >= 1 && ladoC >= 1 && anguloC >= 1) || 
@@ -392,7 +433,10 @@ public class CalculadoraGrafica{
                     textMC.setText(String.format("%.4f", mc));
                     textRadioInterno.setText(String.format("%.4f", radioInterno));
                     textRadioExterno.setText(String.format("%.4f", radioExterno));
-                    }
+                    calcular.toString();
+                    miPila.push(calcular);
+                    model.add(miPila.getTope(), miPila.peek().toString());
+                }
                 // Utilizamos otra comprobación por si el usuario desea calcular 2 lados y 1 angulo
                 } else if(contador == 3 && ((ladoA >= 1 && anguloA >= 1 && anguloB >= 1) || (ladoA >= 1 && anguloA >= 1 && anguloC >= 1) || (ladoA >= 1 && anguloB >= 1 && anguloC >= 1) || 
                 (ladoB >= 1 && anguloA >= 1 && anguloB >= 1) || (ladoB >= 1 && anguloA >= 1 && anguloC >= 1) || (ladoB >= 1 && anguloB >= 1 && anguloC >= 1) || 
@@ -438,23 +482,114 @@ public class CalculadoraGrafica{
                     textMC.setText(String.format("%.4f", mc));
                     textRadioInterno.setText(String.format("%.4f", radioInterno));
                     textRadioExterno.setText(String.format("%.4f", radioExterno));
-                    }
+                    calcular.toString();
+                    miPila.push(calcular);
+                    model.add(miPila.getTope(), miPila.peek().toString());
+                }
                 // Si el contador es mayor a 3 mostramos un mensaje de error
                 }else if(contador > 3){
                     JOptionPane.showMessageDialog(null, "No puedes ingresar más de 3 datos!", "Error", JOptionPane.WARNING_MESSAGE);
                 }else if (contador < 3){ // Si el contador es menor a 3 mostramos un mensaje de error
                     JOptionPane.showMessageDialog(null, "No puedes ingresar menos de 3 datos!", "Error", JOptionPane.WARNING_MESSAGE);
                 }
+                
             }
         });
+        // Implementación del boton para borrar los datos ingresados en los cuadros de texto
+        botonDeshacer.setBounds(100, 600, 100, 40);
+        botonDeshacer.addActionListener(new ActionListener() {
+            @Override
+            /*
+             * Método que permite eliminar la información ingresada en los cuadros de texto 
+             */
+            public void actionPerformed(ActionEvent e){
+                textLadoA.setText(null);
+                textLadoB.setText(null);
+                textLadoC.setText(null);
+                textAnguloA.setText(null);
+                textAnguloB.setText(null);
+                textAnguloC.setText(null);
+            }
+        });
+        panel.add(botonDeshacer);
+        panel.add(botonMostrar);
+        // Implementación del boton para eliminar un solo trianguloi
+        botonEliminar1.setBounds(210, 600, 100, 40);
+        botonEliminar1.addActionListener(new ActionListener() {
+            @Override
+            /*
+             * Método que permite 
+             */
+            public void actionPerformed(ActionEvent e){
+                eliminarSoloElemento();
+            }
+        });
+        panel.add(botonEliminar1);
+
+        botonEliminar2.setBounds(100, 650, 250, 40);
+        botonEliminar2.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e){
+                eliminarHistorial();
+            }
+        });
+
+        panel.add(botonEliminar2);
         // Agregamos el panel al frame
         frame.add(panel);
         // Ponemos titulo al GUI
         frame.setTitle("Calculadora de triangulos");
-        frame.setSize(1000, 1000); // Establecemos el tamaño del frame
+        frame.setSize(1500, 1000); // Establecemos el tamaño del frame
         frame.setLocationRelativeTo(null); // Establecemos que el frame se muestre siempre en el medio de la pantalla
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Establecemos que cuando se cierre el frame se termina el programa
         frame.setVisible(true);
+    }
+
+    private void eliminarSoloElemento(){
+        JTextArea textHistorial = new JTextArea();
+        JScrollPane scrollPane = new JScrollPane(textHistorial);
+        JPanel panelHistorial = new JPanel();
+        JFrame frameHistorial = new JFrame();
+
+        if(miPila.pila_vacia()){
+            JOptionPane.showMessageDialog(null, "No hay triangulos registrados!", "Error", JOptionPane.WARNING_MESSAGE);
+        }else{
+            
+            textHistorial.setText(miPila.pop().toString());
+            textHistorial.setEditable(false);
+            model.remove(miPila.getTope() + 1);
+            panelHistorial.setLayout(new BorderLayout());
+            panelHistorial.add(scrollPane, BorderLayout.CENTER); 
+
+            frameHistorial.add(panelHistorial);
+            frameHistorial.setTitle("Triangulo eliminado");
+            frameHistorial.setSize(500, 500);
+            frameHistorial.setLocationRelativeTo(null);
+            frameHistorial.setVisible(true);
+        }
+        
+    }
+
+    public void eliminarHistorial(){
+        JTextArea textHistorial = new JTextArea();
+        JScrollPane scrollPane = new JScrollPane(textHistorial);
+        JPanel panelHistorial = new JPanel();
+        JFrame frameHistorial = new JFrame();
+        if(miPila.pila_vacia()){
+            JOptionPane.showMessageDialog(null, "No hay triangulos registrados!", "Error", JOptionPane.WARNING_MESSAGE);
+        }else{
+            textHistorial.setText(miPila.vaciarPila());
+            textHistorial.setEditable(false);
+            model.removeAllElements();
+            panelHistorial.setLayout(new BorderLayout());
+            panelHistorial.add(scrollPane, BorderLayout.CENTER); 
+
+            frameHistorial.add(panelHistorial);
+            frameHistorial.setTitle("Triangulos eliminados");
+            frameHistorial.setSize(500, 500);
+            frameHistorial.setLocationRelativeTo(null);
+            frameHistorial.setVisible(true);
+        }
     }
     /*
      * Método Main
